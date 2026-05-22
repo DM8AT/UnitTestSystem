@@ -9,3 +9,8 @@ document*
 # Ignore VS settings
 .vs
 CMakeSettings.json
+# ignore all build files
+*.so
+*.dll
+*.ilk
+*.pdb
