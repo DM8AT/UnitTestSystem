@@ -225,8 +225,7 @@ public:
         #elif __APPLE__
             std::string(path) + ".dylib"
         #else
-            #error todo
-            std::filesystem::path(path).remove_file_name() + ".so"
+            std::filesystem::path(path).remove_filename() / (std::string("lib") + std::filesystem::path(path).filename().string() + ".so");
         #endif
         ;
         //make the path absolute
