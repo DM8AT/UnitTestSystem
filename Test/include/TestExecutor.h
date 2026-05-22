@@ -123,23 +123,17 @@ typedef enum e_TestExecType {
      */
     TEST_EXEC_TYPE_TEST_METADATA = 7,
     /**
-     * @brief the type is a logger create info
-     * 
-     * Available since version 1
-     */
-    TEST_EXEC_TYPE_LOGGER_CREATE_INFO = 8,
-    /**
      * @brief the type is a message color
      * 
      * Available since version 1
      */
-    TEST_EXEC_TYPE_MESSAGE_COLOR = 9,
+    TEST_EXEC_TYPE_MESSAGE_COLOR = 8,
     /**
      * @brief the type is a timestamp
      * 
      * Available since version 1
      */
-    TEST_EXEC_TYPE_TIMESTAMP = 10,
+    TEST_EXEC_TYPE_TIMESTAMP = 9,
 
     /**
      * @brief maximum test type value
@@ -360,27 +354,6 @@ typedef enum e_TestExecTestResult {
 } TestExecTestResult;
 
 /**
- * @brief define the type of logger
- */
-typedef enum e_TestExecLoggerType {
-    /**
-     * @brief define that this logger should print directly to the console
-     */
-    TEST_EXEC_LOGGER_TYPE_CONSOLE = 0,
-    /**
-     * @brief define that this logger should print into a file
-     */
-    TEST_EXEC_LOGGER_TYPE_FILE = 1,
-
-    /**
-     * @brief maximum enum value
-     * 
-     * Used solely to force enum storage size compatibility. Not a valid runtime value.
-     */
-    TEST_EXEC_LOGGER_TYPE_MAX = 0x7fffffff
-} TestExecLoggerType;
-
-/**
  * @brief define the type of send message
  */
 typedef enum e_TestExecMessageType {
@@ -483,23 +456,6 @@ typedef struct s_TestExecTimestamp {
 } TestExecTimestamp;
 
 /**
- * @brief define the create info for a logger in an test executor
- */
-typedef struct s_TestExecLoggerCreateInfo {
-    /**
-     * @brief include the header
-     */
-    TestExecBase header = {
-        .sType = TEST_EXEC_TYPE_LOGGER_CREATE_INFO,
-        .pNext = NULL
-    };
-    /**
-     * @brief define what type of logger to create
-     */
-    TestExecLoggerType loggerType = TEST_EXEC_LOGGER_TYPE_CONSOLE;
-} TestExecLoggerCreateInfo;
-
-/**
  * @brief define the create info for a test executor
  */
 typedef struct s_TestExecExecutorCreateInfo {
@@ -518,16 +474,6 @@ typedef struct s_TestExecExecutorCreateInfo {
      * @brief define the used scheduler strategy
      */
     TestExecExecutorScheduler schedulerStrategy = TEST_EXEC_EXECUTOR_SCHEDULER_FIFO_WEIGHTED;
-    /**
-     * @brief store the amount of passed logger create infos
-     */
-    uint32_t loggerCreateInfoCount = 0;
-    /**
-     * @brief a pointer to an array with at least `loggerCreateInfoCount` logger create infos
-     * 
-     * May be `NULL` if `loggerCreateInfoCount` is 0. 
-     */
-    const TestExecLoggerCreateInfo* pLoggerCreateInfos = NULL;
     /**
      * @brief define a path to a directory to use for temporary files
      * 
@@ -871,9 +817,6 @@ TEST_EXEC_STATIC_ASSERT(alignof(TestExecTestState) == 4, "ABI mismatch: Expected
 //Testing: TestExecTestResult
 TEST_EXEC_STATIC_ASSERT(sizeof(TestExecTestResult) == 4, "ABI mismatch: Expected size of type TestExecTestResult was 4 bytes, but an invalid size was reported.")
 TEST_EXEC_STATIC_ASSERT(alignof(TestExecTestResult) == 4, "ABI mismatch: Expected alignment of type TestExecTestResult was 4 bytes, but an invalid alignment was reported.")
-//Testing: TestExecLoggerType
-TEST_EXEC_STATIC_ASSERT(sizeof(TestExecLoggerType) == 4, "ABI mismatch: Expected size of type TestExecLoggerType was 4 bytes, but an invalid size was reported.")
-TEST_EXEC_STATIC_ASSERT(alignof(TestExecLoggerType) == 4, "ABI mismatch: Expected alignment of type TestExecLoggerType was 4 bytes, but an invalid alignment was reported.")
 //Testing: TestExecMessageType
 TEST_EXEC_STATIC_ASSERT(sizeof(TestExecMessageType) == 4, "ABI mismatch: Expected size of type TestExecMessageType was 4 bytes, but an invalid size was reported.")
 TEST_EXEC_STATIC_ASSERT(alignof(TestExecMessageType) == 4, "ABI mismatch: Expected alignment of type TestExecMessageType was 4 bytes, but an invalid alignment was reported.")
@@ -896,22 +839,15 @@ TEST_EXEC_STATIC_ASSERT(sizeof(TestExecTimestamp) == 24, "ABI mismatch: Expected
 TEST_EXEC_STATIC_ASSERT(alignof(TestExecTimestamp) == 8, "ABI mismatch: Expected alignment of type TestExecTimestamp was 8 bytes, but an invalid alignment was reported.")
 TEST_EXEC_STATIC_ASSERT(offsetof(TestExecTimestamp, header) == 0, "ABI mismatch: Expected the offset of the element header in the type TestExecTimestamp to be 0, but a different offset was reported.")
 TEST_EXEC_STATIC_ASSERT(offsetof(TestExecTimestamp, unixSeconds) == 16, "ABI mismatch: Expected the offset of the element unixSeconds in the type TestExecTimestamp to be 16, but a different offset was reported.")
-//Testing: TestExecLoggerCreateInfo
-TEST_EXEC_STATIC_ASSERT(sizeof(TestExecLoggerCreateInfo) == 24, "ABI mismatch: Expected size of type TestExecLoggerCreateInfo was 24 bytes, but an invalid size was reported.")
-TEST_EXEC_STATIC_ASSERT(alignof(TestExecLoggerCreateInfo) == 8, "ABI mismatch: Expected alignment of type TestExecLoggerCreateInfo was 8 bytes, but an invalid alignment was reported.")
-TEST_EXEC_STATIC_ASSERT(offsetof(TestExecLoggerCreateInfo, header) == 0, "ABI mismatch: Expected the offset of the element header in the type TestExecLoggerCreateInfo to be 0, but a different offset was reported.")
-TEST_EXEC_STATIC_ASSERT(offsetof(TestExecLoggerCreateInfo, loggerType) == 16, "ABI mismatch: Expected the offset of the element loggerType in the type TestExecLoggerCreateInfo to be 16, but a different offset was reported.")
 //Testing: TestExecExecutorCreateInfo
-TEST_EXEC_STATIC_ASSERT(sizeof(TestExecExecutorCreateInfo) == 64, "ABI mismatch: Expected size of type TestExecExecutorCreateInfo was 64 bytes, but an invalid size was reported.")
+TEST_EXEC_STATIC_ASSERT(sizeof(TestExecExecutorCreateInfo) == 48, "ABI mismatch: Expected size of type TestExecExecutorCreateInfo was 48 bytes, but an invalid size was reported.")
 TEST_EXEC_STATIC_ASSERT(alignof(TestExecExecutorCreateInfo) == 8, "ABI mismatch: Expected alignment of type TestExecExecutorCreateInfo was 8 bytes, but an invalid alignment was reported.")
 TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, header) == 0, "ABI mismatch: Expected the offset of the element header in the type TestExecExecutorCreateInfo to be 0, but a different offset was reported.")
 TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, capabilities) == 16, "ABI mismatch: Expected the offset of the element capabilities in the type TestExecExecutorCreateInfo to be 16, but a different offset was reported.")
 TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, schedulerStrategy) == 20, "ABI mismatch: Expected the offset of the element schedulerStrategy in the type TestExecExecutorCreateInfo to be 20, but a different offset was reported.")
-TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, loggerCreateInfoCount) == 24, "ABI mismatch: Expected the offset of the element loggerCreateInfoCount in the type TestExecExecutorCreateInfo to be 24, but a different offset was reported.")
-TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, pLoggerCreateInfos) == 32, "ABI mismatch: Expected the offset of the element pLoggerCreateInfos in the type TestExecExecutorCreateInfo to be 32, but a different offset was reported.")
-TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, tmpDir) == 40, "ABI mismatch: Expected the offset of the element tmpDir in the type TestExecExecutorCreateInfo to be 40, but a different offset was reported.")
-TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, rootDir) == 48, "ABI mismatch: Expected the offset of the element rootDir in the type TestExecExecutorCreateInfo to be 48, but a different offset was reported.")
-TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, maxParallelTests) == 56, "ABI mismatch: Expected the offset of the element maxParallelTests in the type TestExecExecutorCreateInfo to be 56, but a different offset was reported.")
+TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, tmpDir) == 24, "ABI mismatch: Expected the offset of the element tmpDir in the type TestExecExecutorCreateInfo to be 24, but a different offset was reported.")
+TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, rootDir) == 32, "ABI mismatch: Expected the offset of the element rootDir in the type TestExecExecutorCreateInfo to be 32, but a different offset was reported.")
+TEST_EXEC_STATIC_ASSERT(offsetof(TestExecExecutorCreateInfo, maxParallelTests) == 40, "ABI mismatch: Expected the offset of the element maxParallelTests in the type TestExecExecutorCreateInfo to be 40, but a different offset was reported.")
 //Testing: TestExecExecutorCreateInfo
 TEST_EXEC_STATIC_ASSERT(sizeof(TestExecLoadTestInfo) == 24, "ABI mismatch: Expected size of type TestExecLoadTestInfo was 24 bytes, but an invalid size was reported.")
 TEST_EXEC_STATIC_ASSERT(alignof(TestExecLoadTestInfo) == 8, "ABI mismatch: Expected alignment of type TestExecLoadTestInfo was 8 bytes, but an invalid alignment was reported.")

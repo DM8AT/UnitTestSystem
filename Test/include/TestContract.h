@@ -454,38 +454,6 @@ typedef enum e_TestMessageType {
 } TestMessageType;
 
 /**
- * @brief define in what systems the message is included in
- */
-typedef enum e_TestMessageIncludedInBits {
-    /**
-     * @brief the test message is included in the console
-     */
-    TEST_MESSAGE_INCLUDE_IN_CONSOLE_BIT = 0x00000001,
-    /**
-     * @brief the test message is included in the log
-     */
-    TEST_MESSAGE_INCLUDE_IN_LOG_BIT = 0x00000002,
-
-
-    /**
-     * @brief a helper value used to include the message everywhere
-     */
-    TEST_MESSAGE_INCLUDE_IN_ALL = TEST_MESSAGE_INCLUDE_IN_LOG_BIT | TEST_MESSAGE_INCLUDE_IN_CONSOLE_BIT,
-
-    /**
-     * @brief define the max enum value
-     * 
-     * Used solely to force enum storage size compatibility. Not a valid runtime value.
-     */
-    TEST_MESSAGE_INCLUDE_IN_MAX_BIT = 0x7fffffff
-} TestMessageIncludedInBits;
-
-/**
- * @brief define a mask type for the `TestMessageIncludedInBits` enum
- */
-typedef uint32_t TestMessageIncludedInFlags;
-
-/**
  * @brief define the test message color
  * 
  * The color is stored in the sRGB color space. 
@@ -551,10 +519,6 @@ typedef struct s_TestMessage {
      * The message is only referenced. It must stay valid while the test message structure exists. 
      */
     const char* msg = NULL;
-    /**
-     * @brief define in what type of logs the message should be included
-     */
-    TestMessageIncludedInFlags includeIn = TEST_MESSAGE_INCLUDE_IN_ALL;
     /**
      * @brief store what type of message this is
      */
@@ -792,11 +756,6 @@ TEST_STATIC_ASSERT(offsetof(TestReport, msg) == 20, "ABI mismatch: Expected the 
 //Testing: MessageType
 TEST_STATIC_ASSERT(sizeof(TestMessageType) == 4, "ABI mismatch: Expected size of type TestMessageType was 4 bytes, but an invalid size was reported.")
 TEST_STATIC_ASSERT(alignof(TestMessageType) == 4, "ABI mismatch: Expected alignment of type TestMessageType was 4 bytes, but an invalid alignment was reported.")
-//Testing: TestMessageIncludeIn flags
-TEST_STATIC_ASSERT(sizeof(TestMessageIncludedInBits) == 4, "ABI mismatch: Expected size of type TestMessageIncludedInBits was 4 bytes, but an invalid size was reported.")
-TEST_STATIC_ASSERT(alignof(TestMessageIncludedInBits) == 4, "ABI mismatch: Expected alignment of type TestMessageIncludedInBits was 4 bytes, but an invalid alignment was reported.")
-TEST_STATIC_ASSERT(sizeof(TestMessageIncludedInFlags) == 4, "ABI mismatch: Expected size of type TestMessageIncludedInFlags was 4 bytes, but an invalid size was reported.")
-TEST_STATIC_ASSERT(alignof(TestMessageIncludedInFlags) == 4, "ABI mismatch: Expected alignment of type TestMessageIncludedInFlags was 4 bytes, but an invalid alignment was reported.")
 //Testing: TestMessageColor
 TEST_STATIC_ASSERT(sizeof(TestMessageColor) == 24, "ABI mismatch: Expected size of type TestMessageColor was 24 bytes, but an invalid size was reported.")
 TEST_STATIC_ASSERT(alignof(TestMessageColor) == 8, "ABI mismatch: Expected alignment of type TestMessageColor was 8 bytes, but an invalid alignment was reported.")
@@ -812,8 +771,7 @@ TEST_STATIC_ASSERT(offsetof(TestMessage, header) == 0, "ABI mismatch: Expected t
 TEST_STATIC_ASSERT(offsetof(TestMessage, at) == 16, "ABI mismatch: Expected the offset of the element at in the type TestMessage to be 16, but a different offset was reported.")
 TEST_STATIC_ASSERT(offsetof(TestMessage, color) == 24, "ABI mismatch: Expected the offset of the element color in the type TestMessage to be 24, but a different offset was reported.")
 TEST_STATIC_ASSERT(offsetof(TestMessage, msg) == 32, "ABI mismatch: Expected the offset of the element msg in the type TestMessage to be 32, but a different offset was reported.")
-TEST_STATIC_ASSERT(offsetof(TestMessage, includeIn) == 40, "ABI mismatch: Expected the offset of the element includeIn in the type TestMessage to be 40, but a different offset was reported.")
-TEST_STATIC_ASSERT(offsetof(TestMessage, messageType) == 44, "ABI mismatch: Expected the offset of the element messageType in the type TestMessage to be 44, but a different offset was reported.")
+TEST_STATIC_ASSERT(offsetof(TestMessage, messageType) == 40, "ABI mismatch: Expected the offset of the element messageType in the type TestMessage to be 40, but a different offset was reported.")
 //Testing: TestAssertion
 TEST_STATIC_ASSERT(sizeof(TestAssertion) == 56, "ABI mismatch: Expected size of type TestAssertion was 64 bytes, but an invalid size was reported.")
 TEST_STATIC_ASSERT(alignof(TestAssertion) == 8, "ABI mismatch: Expected alignment of type TestResult was 8 bytes, but an invalid alignment was reported.")

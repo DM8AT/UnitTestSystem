@@ -8,28 +8,28 @@
         ],
         "description": "Just a test to show that the contract works"
     },
-    "start_time_unix_ms": 1779465295428,
+    "start_time_unix_ms": 1779465657203,
     "log": [
         {
             "msg_type": "message",
-            "time_stamp_unix_ms": 1779465295454,
+            "time_stamp_unix_ms": 1779465657203,
             "msg": "Hello World from the message system!"
         },
         {
             "msg_type": "message",
-            "time_stamp_unix_ms": 1779465295454,
+            "time_stamp_unix_ms": 1779465657204,
             "msg": "Another message"
         }
     ],
     "stdout": [
-        "Hello from test\r",
-        "Another message from test\r"
+        "Hello from test",
+        "Another message from test"
     ],
     "stderr": [
-        "This is in the error pipe\r"
+        "This is in the error pipe"
     ],
-    "end_time_unix_ms": 1779465295457,
-    "duration_ms": 28,
+    "end_time_unix_ms": 1779465657204,
+    "duration_ms": 1,
     "return": {
         "exit_code":0,
         "state": "TEST_EXEC_TEST_RESULT_SUCCESS",

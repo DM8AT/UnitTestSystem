@@ -108,22 +108,6 @@ public:
             break;
         }
 
-        //create all the loggers
-        TestExecResult res = resizeVector(m_loggers, pInfo->loggerCreateInfoCount);
-        if (res != TEST_EXEC_SUCCESS) {return res;}
-        for (size_t i = 0; i < m_loggers.size(); ++i) {
-            switch (pInfo->pLoggerCreateInfos[i].loggerType) {
-            case TEST_EXEC_LOGGER_TYPE_FILE:
-            case TEST_EXEC_LOGGER_TYPE_CONSOLE:
-                m_loggers[i] = pInfo->pLoggerCreateInfos[i].loggerType;
-                break;
-            
-            default:
-                return TEST_EXEC_INVALID_INPUT;
-                break;
-            }
-        }
-
         //load the root dir
         if (pInfo->rootDir == NULL)
         {m_rootDir = std::filesystem::current_path();}
@@ -168,7 +152,7 @@ public:
         //activate the executer
         m_running = true;
         //create all threads
-        res = resizeVector(m_worker, m_maxParallelTests);
+        TestExecResult res = resizeVector(m_worker, m_maxParallelTests);
         if (res != TEST_EXEC_SUCCESS) {return res;}
         //run the worker function on all threads
         for (auto& thread : m_worker)
@@ -650,11 +634,6 @@ protected:
      * @brief store the capabilites of the executor
      */
     TestExecCapabilityFlags m_capabilities;
-
-    /**
-     * @brief store all created logger types
-     */
-    std::vector<TestExecLoggerType> m_loggers;
 
     /**
      * @brief store all the tests

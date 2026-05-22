@@ -15,15 +15,10 @@
 #include "TestExecutor.h"
 
 int main() {
-    //create a logger for the tests
-    TestExecLoggerCreateInfo logCreate;
-    logCreate.loggerType = TEST_EXEC_LOGGER_TYPE_CONSOLE;
     //create an executor
     TestExecExecutorCreateInfo execCreate;
     execCreate.rootDir = "root";
     execCreate.tmpDir = "tmp";
-    execCreate.loggerCreateInfoCount = 1;
-    execCreate.pLoggerCreateInfos = &logCreate;
     execCreate.schedulerStrategy = TEST_EXEC_EXECUTOR_SCHEDULER_FIFO_WEIGHTED;
     execCreate.capabilities = TEST_EXEC_CAPABILITY_ASYNC_BIT | TEST_EXEC_CAPABILITY_FILE_IO_BIT | TEST_EXEC_CAPABILITY_GPU_BIT | TEST_EXEC_CAPABILITY_NETWORK_BIT;
     TestExecExecutor executor = TEST_EXEC_NULL_HANDLE;
