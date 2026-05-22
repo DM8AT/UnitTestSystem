@@ -14,8 +14,8 @@ target_link_libraries(MAIN TEST_LIB)
 
 add_library(Test1 SHARED src/Test1.cpp)
 set_target_properties(Test1 PROPERTIES 
-                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/test
-                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/test
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/TestLib
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/TestLib
                       CMAKE_CXX_STANDARD 23
                       CMAKE_CXX_STANDARD_REQUIRED ON
                       CMAKE_C_STANDARD 23
@@ -29,7 +29,7 @@ target_compile_definitions(Test1 PRIVATE TEST_BUILD=1)
 
 add_executable(TestWorker Test/src/Worker.cpp)
 set_target_properties(TestWorker PROPERTIES 
-                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/TestLib
                       CMAKE_CXX_STANDARD 23
                       CMAKE_CXX_STANDARD_REQUIRED ON
                       CMAKE_C_STANDARD 23

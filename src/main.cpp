@@ -32,7 +32,7 @@ int main() {
 
     //load a test
     TestExecLoadTestInfo loadInfo;
-    loadInfo.path = "test/Test1";
+    loadInfo.path = "TestLib/Test1";
     if (testExecLoadTests(executor, &loadInfo) != TEST_EXEC_SUCCESS)
     {throw std::runtime_error("Failed to load the requested test");}
 
