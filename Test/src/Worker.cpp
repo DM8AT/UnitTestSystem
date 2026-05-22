@@ -112,14 +112,14 @@ int main(int argc, char const *argv[]) {
     #endif
     //sanity check the argument count
     if (argc != 5)
-    {return 0xff;}
+    {return 0xf0 + argc;}
 
     //get the start time
     auto start = std::chrono::system_clock::now();
 
     //create the logging file
     logFile.open(argv[4], std::ofstream::out | std::ofstream::app);
-    if (!logFile.is_open()) {return 0xf1;}
+    if (!logFile.is_open()) {return 0xf0;}
 
     //establish shared memory connection
     SharedMemory mem;

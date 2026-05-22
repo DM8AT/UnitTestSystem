@@ -47,6 +47,8 @@
 #include <vector>
 //add threading
 #include <thread>
+//add arrays
+#include <array>
 
 /**
  * @brief a simple class that wraps subprocesses
@@ -264,7 +266,7 @@ public:
             //setup the job limitations
             JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
             jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-            if (!SetInformationJobObject(hJob, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli))) {
+            if (!SetInformationJobObject(m_job, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli))) {
                 cleanup();
                 return false;
             }
@@ -292,8 +294,8 @@ public:
             //add all arguments to the command
             for (const auto& arg : args) {
                 //parse the arguments
-                cmd += L" ";
-                cmd += std::wstring(arg.begin(), arg.end());
+                cmd += L" \"";
+                cmd += std::wstring(arg.begin(), arg.end()) + L"\"";
             }
 
             //fill out the process startup info
@@ -427,6 +429,8 @@ public:
         DWORD code{};
         GetExitCodeProcess(m_process, &code);
         m_exitCode = static_cast<int>(code);
+        //get the result
+        getResult(0);
 
         //get the last pipe output
         flush();
@@ -488,6 +492,8 @@ public:
         TerminateProcess(m_process, 1);
         //wait for the process to stop
         WaitForSingleObject(m_process, INFINITE);
+        //get the result
+        getResult(0);
 
     #else
 
@@ -687,14 +693,53 @@ public:
 
 protected:
 
-    void getResult(
-        #ifdef _WIN32
-        #else
-        int status
-        #endif
-    ) {
+    void getResult(int status) {
     #ifdef _WIN32
+        //query exit code from the process
+        DWORD exitCode = 0;
+        if (GetExitCodeProcess(m_process, &exitCode)) {
+            //Check if the process was closed through an unhandeld exception
+            if (exitCode == STATUS_ACCESS_VIOLATION || exitCode == 0xC0000005 || exitCode == 0xC0000374) {
+                m_wasSignaled = true;
+                //store windows exception 
+                m_wasSignaled = true;
+                m_coreDumped = true;
+                m_terminationSignal = 11; //translate to linux segfault err code
+                m_exitedNormally = false;
+            } else if (exitCode == STILL_ACTIVE) {
+                //process is running, but it shoudn't
+                m_terminationSignal = EXIT_CODE_ERROR;
+                m_exitedNormally = false;
+            }
+            else if (exitCode == 0x1) {
+                //terminated
+                m_exitedNormally = false;
+                m_terminationSignal = 9; //translate to killed code
+                m_wasSignaled = true;
+                m_coreDumped = false;
+            } else if (exitCode == 0x0) {
+                //normal closing
+                m_exitedNormally = true;
+                m_terminationSignal = 0;
+                m_wasSignaled = false;
+                m_coreDumped = false;
+            }
+            else {
+                //unknown
+                m_exitedNormally = false;
+                m_terminationSignal = static_cast<int>(exitCode);
+                m_wasSignaled = false;
+                m_coreDumped = false;
+            }
+        }
+        else {
+            //API-Error
+            m_terminationSignal = EXIT_CODE_ERROR;
+            m_exitedNormally = false;
+        }
 
+        //flush queued up stuff
+        flush();
     #else
         //check if the exit was normal
         if (WIFEXITED(status)) {

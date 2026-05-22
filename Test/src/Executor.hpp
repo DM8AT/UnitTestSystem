@@ -219,22 +219,25 @@ public:
      */
     TestExecResult load(const char* path) {
         //add the correct file suffix
-        std::string sPath = std::string(path) +
+        std::string sPath = 
         #ifdef _WIN32
-                ".dll"
+            std::string(path) +  ".dll"
         #elif __APPLE__
-                ".dylib"
+            std::string(path) + ".dylib"
         #else
-                ".so"
+            #error todo
+            std::filesystem::path(path).remove_file_name() + ".so"
         #endif
         ;
+        //make the path absolute
+        std::filesystem::path absPath = std::filesystem::absolute(sPath);
         //check if the file exists
-        if (!std::filesystem::is_regular_file(sPath))
+        if (!std::filesystem::is_regular_file(absPath))
         {return TEST_EXEC_FILE_NOT_FOUND;}
         //create the library
         DynamicLibrary lib;
         //try to load the library
-        if (!lib.open(sPath))
+        if (!lib.open(absPath))
         {return TEST_EXEC_FILE_LOAD_ERROR;}
 
         //make sure the file has a contract entry point
@@ -306,10 +309,12 @@ public:
     TestExecResult waitIdle(uint64_t timeout) {
         //obtain a lock on the active task count
         std::unique_lock lock(m_currentActiveMtx);
+        auto max_timeout = std::chrono::milliseconds::max();
+        uint64_t cappedTimeout = (timeout > max_timeout.count()) ? max_timeout.count() : timeout;
         //wait for the count to be 0
-        bool success = m_currentActiveCv.wait_for(lock, std::chrono::milliseconds(timeout), [&]{return (
+        bool success = m_currentActiveCv.wait_for(lock, std::chrono::milliseconds(cappedTimeout), [&]{return (
             (m_currentlyActiveTasks.load(std::memory_order_acquire)==0) && 
-            (m_queuedTests.size() == 0)
+            (m_queuedTests.empty())
         );});
         //return if the wait was successful
         return (success ? TEST_EXEC_SUCCESS : TEST_EXEC_GENERIC_ERROR);

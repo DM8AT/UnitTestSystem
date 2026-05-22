@@ -98,11 +98,6 @@ extern "C" {
 #endif
 
 /**
- * @brief a define that sets function flags for all functions used in the test interface
- */
-#define TEST_FN TEST_CALL TEST_ABI
-
-/**
  * @brief define the name of the test registration function
  * 
  * Assumed type: `PFN_RegisterTest`
@@ -115,7 +110,7 @@ extern "C" {
 /**
  * @brief a helper to define the function to register tests from an dynamic library
  */
-#define TEST_REGISTER_TEST_FN extern "C" void TEST_FN TEST_REGISTER_TEST(uint64_t *size, Test *data)
+#define TEST_REGISTER_TEST_FN extern "C" TEST_ABI void TEST_CALL TEST_REGISTER_TEST(uint64_t *size, Test *data)
 
 /**
  * @brief define the name of the get abi function
@@ -130,7 +125,7 @@ extern "C" {
 /**
  * @brief a helper to define the function to get the ABI version used by an dynamic library
  */
-#define TEST_GET_ABI_VERSION_FN extern "C" uint64_t TEST_FN TEST_GET_ABI_VERSION()
+#define TEST_GET_ABI_VERSION_FN extern "C" TEST_ABI uint64_t TEST_CALL TEST_GET_ABI_VERSION()
 
 /**
  * @brief a helper for compile-time ABI comptability tests

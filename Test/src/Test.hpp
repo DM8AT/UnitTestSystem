@@ -18,6 +18,8 @@
 
 //add the filesystem
 #include <filesystem>
+//add vectors
+#include <vector>
 //for replace
 #include <algorithm>
 //for printf debugging
@@ -207,6 +209,7 @@ public:
         //create the shared memory UUID
         std::string memId = m_libPath.string() + "_" + m_name;
         std::replace(memId.begin(), memId.end(), '/', '_');
+        std::replace(memId.begin(), memId.end(), '\\', '_');
         memId = std::string("/") + memId;
 
         //create the shared memory arena
@@ -261,17 +264,18 @@ public:
 
         //create the subprocess to use
         Subprocess proc;
-        if (!proc.launch(
-            p, {
+        std::vector<std::string> args = {
                 //pass the worker name
-                m_name.c_str(), 
+                m_name,
                 //pass the library location
-                m_libPath.c_str(),
+                m_libPath.string(),
                 //pass the memory UUID
-                memId.c_str(),
+                memId,
                 //pass the log file path
-                m_logPath.c_str()
-            }
+                m_logPath.string()
+            };
+        if (!proc.launch(
+            p, args
         )) 
         {return TEST_EXEC_GENERIC_ERROR;}
 
