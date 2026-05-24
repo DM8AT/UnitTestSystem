@@ -197,14 +197,18 @@ public:
 
         //try to find the worker
         std::filesystem::path p = Subprocess::getCurrentExecutablePath().remove_filename();
-        p = p / "test" / 
+        p = p / "TestLib" / 
         #if _WIN32
         "TestWorker.exe";
         #else
         "TestWorker";
         #endif
-        if (!std::filesystem::is_regular_file(p))
-        {return TEST_EXEC_FILE_NOT_FOUND;}
+        if (!std::filesystem::is_regular_file(p)) {
+            m_state = TEST_EXEC_TEST_STATE_DONE;
+            m_execReport = TEST_EXEC_TEST_RESULT_INVALID;
+            m_returnValue = -3;
+            return TEST_EXEC_FILE_NOT_FOUND;
+        }
 
         //create the shared memory UUID
         std::string memId = m_libPath.string() + "_" + m_name;

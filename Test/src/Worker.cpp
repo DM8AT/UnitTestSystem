@@ -80,6 +80,14 @@ void logFn(const TestMessage* msg) {
         stream << "                \"alpha\": " << static_cast<uint32_t>(msg->color->alpha) << "\n";
         stream << "            },\n";
     }
+    //if existing, log the location
+    if (msg->at) {
+        stream << "            \"at\": {\n";
+        stream << "                \"file:\": \"" << escapeJsonString(msg->at->file) << "\",\n";
+        stream << "                \"line:\": " << msg->at->line << ",\n";
+        stream << "                \"expression:\": \"" << escapeJsonString(msg->at->expression) << "\",\n";
+        stream << "            },\n";
+    }
     //log the timestamp
     auto timeStamp = std::chrono::system_clock::now();
     stream << "            \"time_stamp_unix_ms\": " << std::chrono::duration_cast<std::chrono::milliseconds>(timeStamp.time_since_epoch()).count() << ",\n";
@@ -92,6 +100,55 @@ void logFn(const TestMessage* msg) {
     finalized << (isFirstLogEntry.exchange(false, std::memory_order_relaxed) ? "" : ",\n") << stream.str();
     logFile << finalized.str() << std::flush;
     //release lock
+}
+
+void assertFn(const TestAssertion* assert) {
+    //if the assertion is invalid, stop
+    if (assert == NULL) {return;}
+
+    //start the assertion log block
+    //since this can be called from multiple threads, cache the to-print block locally
+    std::stringstream stream;
+    stream << "        {\n";
+    stream << "            \"msg_type\": \"assertion\",\n";
+    //if existing, log the color
+    if (assert->color) {
+        stream << "            \"color\": {\n";
+        stream << "                \"red\": " << static_cast<uint32_t>(assert->color->red) << ",\n";
+        stream << "                \"green\": " << static_cast<uint32_t>(assert->color->green) << ",\n";
+        stream << "                \"blue\": " << static_cast<uint32_t>(assert->color->blue) << ",\n";
+        stream << "                \"alpha\": " << static_cast<uint32_t>(assert->color->alpha) << "\n";
+        stream << "            },\n";
+    }
+    //if existing, log the location
+    if (assert->at) {
+        stream << "            \"at\": {\n";
+        stream << "                \"file:\": \"" << escapeJsonString(assert->at->file) << "\",\n";
+        stream << "                \"line:\": " << assert->at->line << ",\n";
+        stream << "                \"expression:\": \"" << escapeJsonString(assert->at->expression) << "\"\n";
+        stream << "            },\n";
+    }
+    //log the timestamp
+    auto timeStamp = std::chrono::system_clock::now();
+    stream << "            \"time_stamp_unix_ms\": " << std::chrono::duration_cast<std::chrono::milliseconds>(timeStamp.time_since_epoch()).count() << ",\n";
+    //log the expected and actual value
+    stream << "            \"expected\": \"" << escapeJsonString(assert->expected) << "\",\n";
+    stream << "            \"actual\": \"" << escapeJsonString(assert->actual) << "\",\n";
+    stream << "            \"passed\": " << ((assert->passed == 1) ? 1 : 0) << "\n";
+    stream << "        }";
+    {
+    //output the stream to the file
+    std::unique_lock lock(logFileMtx);
+    //finalize stringstream used to guarantee that json is always valid -> no flush can happen if nothing is written to the file
+    std::stringstream finalized;
+    finalized << (isFirstLogEntry.exchange(false, std::memory_order_relaxed) ? "" : ",\n") << stream.str();
+    logFile << finalized.str() << std::flush;
+    //release lock
+    }
+
+    //if the assertion did NOT pass, return with the assertion value as the exit code
+    if (assert->passed != 0)
+    {exit(assert->passed);}
 }
 
 /**
@@ -157,7 +214,8 @@ int main(int argc, char const *argv[]) {
 
     //write the test functions
     TestFunctions funcs {
-        .log = &logFn
+        .log = &logFn,
+        .assertion = &assertFn
     };
 
     //else, invoke the invoker

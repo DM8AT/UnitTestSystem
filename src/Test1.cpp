@@ -17,7 +17,7 @@
 
 void runTest(const TestContext* ctx, TestReport* report, const TestFunctions* funcs) {
     //log a message
-    TestMessage msg {};
+    TestMessage msg;
     msg.messageType = TEST_MESSAGE_TYPE_INFO;
     msg.msg = "Hello World from the message system!";
 
@@ -30,6 +30,21 @@ void runTest(const TestContext* ctx, TestReport* report, const TestFunctions* fu
 
     msg.msg = "Another message";
     (*(funcs->log))(&msg);
+
+    TestFileMarker marker;
+    marker.file = "Test1.cpp";
+    marker.line = 38;
+    marker.expression = "uint8_t value = 1+1;";
+    uint8_t value = 1+1;
+    TestAssertion ass;
+    ass.expected = "1 + 1 == 2";
+    std::string acc = std::string("1 + 1 == ") + std::to_string(value);
+    ass.actual = acc.c_str();
+    ass.passed = static_cast<uint8_t>(value == 2);
+    ass.at = &marker;
+    (*(funcs->assertion))(&ass);
+
+    std::cout << "Ran assertion\n";
 
     //success
     report->result = TEST_SUCCESS;

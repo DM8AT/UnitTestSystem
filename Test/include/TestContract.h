@@ -621,6 +621,17 @@ typedef struct s_TestFunctions {
      * If the test message pointer is `NULL`, the function will return immediately and safely. This is legal. 
      */
     void (*log)(const TestMessage*) = NULL;
+
+    /**
+     * @brief a function to log and potentially throw an assertion
+     * 
+     * This function may be called concurrently. 
+     * 
+     * If the test assertion pointer is `NULL`, the function will return immediately and safely. This is legal. 
+     * 
+     * This function may stop the test if TestAssertion::passed is not 1. 
+     */
+    void (*assertion)(const TestAssertion*) = NULL;
 } TestFunctions;
 
 /**
@@ -788,10 +799,11 @@ TEST_STATIC_ASSERT(offsetof(TestContext, tmpDir) == 0, "ABI mismatch: Expected t
 TEST_STATIC_ASSERT(offsetof(TestContext, rootDir) == (sizeof(char)*TEST_MAX_FILE_CHAR_COUNT), "ABI mismatch: Expected the offset of the element rootDir in the type TestContext to be ${sizeof(char)*TEST_MAX_FILE_CHAR_COUNT}, but a different offset was reported.")
 TEST_STATIC_ASSERT(offsetof(TestContext, randomSeed) == (sizeof(char)*TEST_MAX_FILE_CHAR_COUNT*2), "ABI mismatch: Expected the offset of the element randomSeed in the type TestContext to be ${(sizeof(char)*TEST_MAX_FILE_CHAR_COUNT*2)}, but a different offset was reported.")
 //Testing: Test Functions
-TEST_STATIC_ASSERT(sizeof(TestFunctions) == 24, "ABI mismatch: Expected size of type TestFunctions was 24 bytes, but an invalid size was reported.")
+TEST_STATIC_ASSERT(sizeof(TestFunctions) == 32, "ABI mismatch: Expected size of type TestFunctions was 24 bytes, but an invalid size was reported.")
 TEST_STATIC_ASSERT(alignof(TestFunctions) == 8, "ABI mismatch: Expected alignment of type TestFunctions was 8 bytes, but an invalid alignment was reported.")
 TEST_STATIC_ASSERT(offsetof(TestFunctions, header) == 0, "ABI mismatch: Expected the offset of the element header in the type TestFunctions to be 0, but a different offset was reported.")
-TEST_STATIC_ASSERT(offsetof(TestFunctions, log) == 16, "ABI mismatch: Expected the offset of the element red in the type TestFunctions to be 16, but a different offset was reported.")
+TEST_STATIC_ASSERT(offsetof(TestFunctions, log) == 16, "ABI mismatch: Expected the offset of the element log in the type TestFunctions to be 16, but a different offset was reported.")
+TEST_STATIC_ASSERT(offsetof(TestFunctions, assertion) == 24, "ABI mismatch: Expected the offset of the element assertion in the type TestFunctions to be 24, but a different offset was reported.")
 //Testing: PFN_TestInvoker
 TEST_STATIC_ASSERT(sizeof(PFN_TestInvoker) == 8, "ABI mismatch: Expected size of type PFN_TestInvoker was 8 bytes, but an invalid size was reported.")
 TEST_STATIC_ASSERT(alignof(PFN_TestInvoker) == 8, "ABI mismatch: Expected alignment of type PFN_TestInvoker was 8 bytes, but an invalid alignment was reported.")

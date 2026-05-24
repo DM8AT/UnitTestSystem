@@ -290,6 +290,8 @@ public:
      * @return `TestExecResult` `TEST_EXEC_SUCCESS` on success and `TEST_EXEC_GENERIC_ERROR` on timeout
      */
     TestExecResult waitIdle(uint64_t timeout) {
+        //give the tests some time to start
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         //obtain a lock on the active task count
         std::unique_lock lock(m_currentActiveMtx);
         auto max_timeout = std::chrono::milliseconds::max();
@@ -297,6 +299,7 @@ public:
         //wait for the count to be 0
         bool success = m_currentActiveCv.wait_for(lock, std::chrono::milliseconds(cappedTimeout), [&]{return (
             (m_currentlyActiveTasks.load(std::memory_order_acquire)==0) && 
+            (m_inUse.activeTestCount == 0) &&
             (m_queuedTests.empty())
         );});
         //return if the wait was successful
@@ -412,7 +415,7 @@ protected:
      */
     void registerRunning(TestRequirementFlags flags) {
         //increase the in use count
-        m_currentlyActiveTasks.fetch_add(1, std::memory_order_relaxed);
+        m_currentlyActiveTasks.fetch_add(1, std::memory_order_release);
 
         //increase the amount of running tests
         ++m_inUse.activeTestCount;
@@ -453,7 +456,7 @@ protected:
      */
     void removeRunning(TestRequirementFlags flags) {
         //increase the in use count
-        m_currentlyActiveTasks.fetch_sub(1, std::memory_order_relaxed);
+        m_currentlyActiveTasks.fetch_sub(1, std::memory_order_release);
 
         //decrease the amount of running tests
         --m_inUse.activeTestCount;
